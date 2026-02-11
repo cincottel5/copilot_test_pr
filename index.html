@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notes App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -29,12 +30,26 @@
     }
     
     h1 {
-      color: white;
+      font-family: 'Fredoka One', cursive;
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #667eea);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       text-align: center;
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: 600;
       margin-bottom: 40px;
-      letter-spacing: -0.5px;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: gradientShift 3s ease infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h2 {

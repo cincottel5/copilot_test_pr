@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: url('assets/background.jpg') center/cover no-repeat fixed;
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      max-width: 650px;
+      margin: 0 auto 30px;
+    }
+    
+    h1 {
+      color: white;
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 40px;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      color: #2d3748;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: -0.3px;
+    }
+    
+    textarea {
+      width: 100%;
+      margin-bottom: 16px;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #f7fafc;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+    }
+
+    textarea::placeholder {
+      color: #a0aec0;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #f7fafc;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+    }
+
+    input[type="text"]::placeholder {
+      color: #a0aec0;
+    }
+    
+    button {
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .delete-button {
+      background: #e53e3e;
+      margin-top: 12px;
+    }
+
+    .delete-button:hover {
+      background: #c53030;
+      box-shadow: 0 10px 25px rgba(229, 62, 62, 0.3);
+    }
+
+    .note-content {
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 10px;
+      word-wrap: break-word;
+      margin-bottom: 16px;
+      color: #2d3748;
+      line-height: 1.7;
+      border-left: 4px solid #667eea;
+      position: relative;
+    }
+
+    .note-item {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .note-item .note-content {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .note-item .delete-button {
+      margin-top: 0;
+      padding: 8px 12px;
+      font-size: 12px;
+      width: auto;
+      flex-shrink: 0;
+      height: fit-content;
+    }
+
+    #savedNoteDisplay p {
+      color: #718096;
+      font-style: italic;
+    }
+
+    .notes-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+  </style>
+  <!-- Save the notes to local storage and display them below -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const saveButton = document.getElementById('saveButton');
+      const noteInput = document.getElementById('noteInput');
+      const savedNoteDisplay = document.getElementById('savedNoteDisplay');
+      const searchInput = document.getElementById('searchInput');
+      
+      // Get notes from localStorage
+      function getNotes() {
+        const notes = localStorage.getItem('notes');
+        return notes ? JSON.parse(notes) : [];
+      }
+      
+      // Save notes to localStorage
+      function saveNotes(notes) {
+        localStorage.setItem('notes', JSON.stringify(notes));
+      }
+      
+      // Display notes with optional filter
+      function displayNotes(filterText = '') {
+        const notes = getNotes();
+        const filteredNotes = filterText 
+          ? notes.filter(note => note.text.toLowerCase().includes(filterText.toLowerCase()))
+          : notes;
+        
+        if (filteredNotes.length === 0) {
+          savedNoteDisplay.innerHTML = filterText 
+            ? '<p>No notes match your search.</p>'
+            : '<p>No saved notes.</p>';
+          return;
+        }
+        
+        savedNoteDisplay.innerHTML = filteredNotes.map((note, index) => {
+          // Find the original index for deletion
+          const originalIndex = notes.findIndex(n => n.id === note.id);
+          return `
+            <div class="note-item">
+              <div class="note-content">${note.text}</div>
+              <button class="delete-button" data-index="${originalIndex}">Delete Note</button>
+            </div>
+          `;
+        }).join('');
+        
+        // Add delete functionality to all delete buttons
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        deleteButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            if (confirm('Are you sure you want to delete this note?')) {
+              const notes = getNotes();
+              notes.splice(index, 1);
+              saveNotes(notes);
+              displayNotes(searchInput.value);
+              alert('Note deleted!');
+            }
+          });
+        });
+      }
+      
+      // Save button click handler
+      saveButton.addEventListener('click', function() {
+        const note = noteInput.value.trim();
+        if (note) {
+          const notes = getNotes();
+          notes.push({
+            id: Date.now(),
+            text: note,
+            timestamp: new Date().toISOString()
+          });
+          saveNotes(notes);
+          displayNotes(searchInput.value);
+          alert('Note saved!');
+          noteInput.value = '';
+        } else {
+          alert('Please write a note before saving.');
+        }
+      });
+      
+      // Search input handler
+      searchInput.addEventListener('input', function() {
+        displayNotes(this.value);
+      });
+      
+      // Load and display notes on page load
+      displayNotes();
+    });
+  </script>
+
+</head>
+<body>
+  <!-- Create a simple UI layout with a title, textarea input and a save button-->
+  <h1>Notes App</h1>
+  <div class="container">
+    <textarea id="noteInput" rows="8" cols="50" placeholder="Write your note here..."></textarea>
+    <button id="saveButton">Save Note</button>
+  </div>
+
+  <div class="container">
+    <h2>Saved Notes:</h2>
+    <input type="text" id="searchInput" placeholder="Search notes..." />
+    <div class="notes-list">
+      <div id="savedNoteDisplay"></div>
+    </div>
+  </div>
+  
+</body>
+</html>
